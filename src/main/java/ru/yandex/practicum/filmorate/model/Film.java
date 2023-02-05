@@ -16,11 +16,10 @@ public class Film {
     private int id; // целочисленный идентификатор
     @NotBlank
     private String name; // название
-    @Size(min = 1, max = 200)
+    @Size(max = 200)
     private String description; // описание
     @NotNull
     private LocalDate releaseDate; // дата релиза
     @Positive
-    @Min(1)
     private long duration; // продолжительность фильма
 }

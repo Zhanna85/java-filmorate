@@ -5,64 +5,43 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import static ru.yandex.practicum.filmorate.message.Message.*;
 
 @Slf4j
-public class FilmService {
-
-    private static final LocalDate date = LocalDate.of(1895, 12, 28);
-
-    private final Map<Integer, Film> films= new HashMap<>();
-
-    private int generateID = 0;
+public class FilmService extends Service<Film>{
+    private static final LocalDate DATE = LocalDate.of(1895, 12, 28);
 
     private void dataValidator(Film film) {
-        if(film.getReleaseDate().isBefore(date)) {
-            log.error("The release date can't be earlier - " + date);
-            throw new ValidationException("Дата релиза не может быть раньше - " + date);
-        }
-        if(film.getName().isBlank()) {
-            log.error("Name may not be empty");
-            throw new ValidationException("Название не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            log.error("Description the max length is 200 characters");
-            throw new ValidationException("Максимальная длина описания должна быть - 200 символов");
-        }
-        if (film.getDuration() <= 0) {
-            log.error("Duration of the film cannot be negative");
-            throw new ValidationException("Продолжительность фильма должна быть положительной");
+        if (film.getReleaseDate().isBefore(DATE)) {
+            log.error(RELEASE_DATE.getMessage() + DATE);
+            throw new ValidationException(RELEASE_DATE.getMessage() + DATE);
         }
     }
 
-    public List<Film> getAllFilms(){
-        return new ArrayList<>(films.values());
-    }
-
-    public Film addFilm(Film film){
+    @Override
+    public Film add(Film film){
         dataValidator(film);
-        if(films.containsValue(film)) {
-            log.error("model Film already exists");
-            throw new ValidationException("Фильм уже существует");
+        if(list.containsValue(film)) {
+            log.error(DUPLICATE.getMessage());
+            throw new ValidationException(DUPLICATE.getMessage());
         }
         generateID++;
         film.setId(generateID);
-        films.put(generateID, film);
-        log.info("{} added to the service ", film);
+        list.put(generateID, film);
+        log.info(ADD_MODEL.getMessage(), film);
         return film;
     }
 
-    public Film updateFilm(Film film) {
-        if(!films.containsKey(film.getId())) {
-            log.error("model Film by iD - " + film.getId() + " not found");
-            throw new ValidationException("Фильм по ИД - " + film.getId() + " не найден.");
+    @Override
+    public Film update(Film film) {
+        if(!list.containsKey(film.getId())) {
+            log.error(MODEL_NOT_FOUND.getMessage() + film.getId());
+            throw new ValidationException(MODEL_NOT_FOUND.getMessage() + film.getId());
         }
         dataValidator(film);
-        films.put(film.getId(), film);
-        log.info("{} added to the service ", film);
+        list.put(film.getId(), film);
+        log.info(UPDATED_MODEL.getMessage(), film);
         return film;
     }
 }

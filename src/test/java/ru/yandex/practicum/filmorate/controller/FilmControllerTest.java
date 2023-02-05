@@ -53,7 +53,7 @@ class FilmControllerTest {
                 ValidationException.class,
                 () -> filmController.saveFilm(film2));
 
-        assertEquals("Фильм уже существует", exception.getMessage()
+        assertEquals("the model already exists", exception.getMessage()
                 , "exception message проверки на дубликат не верна");
 
         List<Film> filmList = filmController.listFilms();
@@ -74,73 +74,8 @@ class FilmControllerTest {
                 ValidationException.class,
                 () -> filmController.saveFilm(film));
 
-        assertEquals("Дата релиза не может быть раньше - 1895-12-28", exception.getMessage()
+        assertEquals("The release date can't be earlier - 1895-12-28", exception.getMessage()
                 , "exception message проверки дата релиза не верна");
-    }
-
-    @Test
-    void shouldThrowExceptionCreatingInvalidNameFilm() {
-        Film film = new Film();
-        film.setName("");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(1998, 1, 1));
-        film.setDuration(100);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmController.saveFilm(film));
-
-        assertEquals("Название не может быть пустым", exception.getMessage()
-                , "exception проверки имени не верен");
-    }
-
-    @Test
-    void shouldThrowExceptionCreatingInvalidDescriptionFilm() {
-        Film film = new Film();
-        film.setName("film");
-        film.setDescription("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-                "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-                "ffffffffffffffffffffffffffff");
-        film.setReleaseDate(LocalDate.of(1998, 1, 1));
-        film.setDuration(100);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmController.saveFilm(film));
-
-        assertEquals("Максимальная длина описания должна быть - 200 символов", exception.getMessage()
-                , "exception проверки description не верен");
-    }
-
-    @Test
-    void shouldThrowExceptionCreatingInvalidDurationFilm() {
-        Film film = new Film();
-        film.setName("film");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(1998, 1, 1));
-        film.setDuration(0);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmController.saveFilm(film));
-
-        assertEquals("Продолжительность фильма должна быть положительной", exception.getMessage()
-                , "exception проверки Duration не верен");
-    }
-
-    @Test
-    void shouldThrowExceptionCreatingInvalidDurationNegativeValueFilm() {
-        Film film = new Film();
-        film.setName("film");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(1998, 1, 1));
-        film.setDuration(-1);
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> filmController.saveFilm(film));
-        assertEquals("Продолжительность фильма должна быть положительной", exception.getMessage()
-                , "exception проверки Duration не верен");
     }
 
     @Test
@@ -191,7 +126,7 @@ class FilmControllerTest {
         final ValidationException exception = assertThrows(
                 ValidationException.class,
                 () -> filmController.updateFilm(film2));
-        assertEquals("Фильм по ИД - 2 не найден.", exception.getMessage()
+        assertEquals("model was not found by the passed ID: 2", exception.getMessage()
                 , "exception проверки неверный");
     }
 

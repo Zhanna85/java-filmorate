@@ -23,7 +23,7 @@ class UserControllerTest {
     void createUser() {
         User user = User.builder()
                 .email("mail@mail.ru")
-                .login("do lore")
+                .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1985, 4, 4))
                 .build();
@@ -31,14 +31,14 @@ class UserControllerTest {
         List<User> usersList = userController.getListUsers();
 
         assertEquals(user, usersList.get(0), "Пользователи не равны");
-        assertEquals(1, usersList.size(), "Размер списка неверно указан");
+        assertEquals(1, usersList.size(), "Размер списка не верно указан");
     }
 
     @Test
     void create2User() {
         User user = User.builder()
                 .email("mail@mail.ru")
-                .login("do lore")
+                .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1985, 4, 4))
                 .build();
@@ -46,7 +46,7 @@ class UserControllerTest {
 
         User user2 = User.builder()
                 .email("mail@yandex.ru")
-                .login("do lore2")
+                .login("dolore2")
                 .name("Nick Name 2")
                 .birthday(LocalDate.of(1986, 4, 4))
                 .build();
@@ -61,7 +61,7 @@ class UserControllerTest {
     void shouldThrowExceptionSaveDuplicateUser() {
         User user = User.builder()
                 .email("mail@mail.ru")
-                .login("do lore")
+                .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1985, 4, 4))
                 .build();
@@ -69,7 +69,7 @@ class UserControllerTest {
 
         User user2 = User.builder()
                 .email("mail@mail.ru")
-                .login("do lore")
+                .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1985, 4, 4))
                 .build();
@@ -78,26 +78,8 @@ class UserControllerTest {
                 ValidationException.class,
                 () -> userController.createUser(user2));
 
-        assertEquals("Пользователь уже существует.", exception.getMessage()
+        assertEquals("the model already exists", exception.getMessage()
                 , "exception message проверки на дубликат не верна");
-    }
-
-    @Test
-    void shouldThrowExceptionSaveInvalidEmailUser() {
-        User user = User.builder()
-                .email("mail.ru")
-                .login("dolore")
-                .name("Nick Name")
-                .birthday(LocalDate.of(1985, 4, 4))
-                .build();
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> userController.createUser(user));
-
-        assertEquals("Значение поля Email не может быть пустым и должен содержать символ @"
-                , exception.getMessage()
-                , "exception message проверки email не верна");
     }
 
     @Test
@@ -113,16 +95,16 @@ class UserControllerTest {
                 ValidationException.class,
                 () -> userController.createUser(user));
 
-        assertEquals("Значение поля Email не может быть пустым и должен содержать символ @"
+        assertEquals("Email cannot be empty and must contain the \"@\" character"
                 , exception.getMessage()
                 , "exception message проверки email не верна");
     }
 
     @Test
-    void shouldThrowExceptionSaveLoginIsEmptyUser() {
+    void shouldThrowExceptionSaveLoginIsContainSpaces() {
         User user = User.builder()
                 .email("mail@mail.ru")
-                .login("")
+                .login("do lore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1985, 4, 4))
                 .build();
@@ -131,27 +113,9 @@ class UserControllerTest {
                 ValidationException.class,
                 () -> userController.createUser(user));
 
-        assertEquals("Логин не должен быть пустым или содержать пробелы"
+        assertEquals("Login may not be empty or contain spaces"
                 , exception.getMessage()
-                , "exception message проверки email не верна");
-    }
-
-    @Test
-    void shouldThrowExceptionSaveUserLoginContainsSpaces() {
-        User user = User.builder()
-                .email("mail@mail.ru")
-                .login("   ")
-                .name("Nick Name")
-                .birthday(LocalDate.of(1985, 4, 4))
-                .build();
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> userController.createUser(user));
-
-        assertEquals("Логин не должен быть пустым или содержать пробелы"
-                , exception.getMessage()
-                , "exception message проверки email не верна");
+                , "exception message проверки Login не верна");
     }
 
     @Test
@@ -179,24 +143,6 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionSaveUserInvalidBirthday() {
-        User user = User.builder()
-                .email("mail@mail.ru")
-                .login("login")
-                .name("Nick Name")
-                .birthday(LocalDate.of(2285, 4, 4))
-                .build();
-
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> userController.createUser(user));
-
-        assertEquals("Дата рождения не может быть в будущем"
-                , exception.getMessage()
-                , "exception message проверки birthday не верна");
-    }
-
-    @Test
     void updateUser() {
         User user = User.builder()
                 .email("mail@mail.ru")
@@ -214,7 +160,7 @@ class UserControllerTest {
         User user2 = User.builder()
                 .id(1)
                 .email("mail@mail.ru")
-                .login("New login")
+                .login("Newlogin")
                 .name("Nick Name2")
                 .birthday(LocalDate.of(1985, 5, 4))
                 .build();
@@ -244,7 +190,7 @@ class UserControllerTest {
         User user2 = User.builder()
                 .id(3)
                 .email("mail@mail.ru")
-                .login("New login")
+                .login("Newlogin")
                 .name("Nick Name2")
                 .birthday(LocalDate.of(1985, 5, 4))
                 .build();
@@ -252,7 +198,7 @@ class UserControllerTest {
         final ValidationException exception = assertThrows(
                 ValidationException.class,
                 () -> userController.updateUser(user2));
-        assertEquals("Пользователя c ИД 3 не найден.", exception.getMessage()
+        assertEquals("model was not found by the passed ID: 3", exception.getMessage()
                 , "exception проверки неверный");
     }
 }

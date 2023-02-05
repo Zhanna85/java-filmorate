@@ -4,32 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static ru.yandex.practicum.filmorate.message.Message.*;
 
 @Slf4j
-public class UserService {
-    private final Map<Integer, User> users= new HashMap<>();
-
-    private int generateID = 0;
+public class UserService extends Service<User>{
 
     private void dataValidatorUser(User user) {
-        String email = user.getEmail();
-        if (email.isBlank() || !email.contains("@")) {
-            log.error("Email cannot be empty and must contain the \"@\" character");
-            throw new ValidationException("Значение поля Email не может быть пустым " +
-                    "и должен содержать символ @");
+        if (user.getEmail().isBlank()) {
+            log.error(EMAIL_CANNOT_BE_EMPTY.getMessage());
+            throw new ValidationException(EMAIL_CANNOT_BE_EMPTY.getMessage());
         }
-        if (user.getLogin().isBlank()){
-            log.error("Login may not be empty");
-            throw new ValidationException("Логин не должен быть пустым или содержать пробелы");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Birthday can't be in the future");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+        if (user.getLogin().contains(" ")){
+            log.error(LOGIN_MAY_NOT_CONTAIN_SPACES.getMessage());
+            throw new ValidationException(LOGIN_MAY_NOT_CONTAIN_SPACES.getMessage());
         }
     }
 
@@ -40,33 +27,31 @@ public class UserService {
         }
     }
 
-    public List<User> getAllUsers(){
-        return new ArrayList<>(users.values());
-    }
-
-    public User addUser(User user) {
+    @Override
+    public User add(User user) {
         dataValidatorUser(user);
-        if (users.containsValue(user)) {
-            log.error("model User already exists");
-            throw new ValidationException("Пользователь уже существует.");
+        if (list.containsValue(user)) {
+            log.error(DUPLICATE.getMessage());
+            throw new ValidationException(DUPLICATE.getMessage());
         }
         generateID++;
         user.setId(generateID);
         updateName(user);
-        users.put(user.getId(), user);
-        log.info("{} added to the service ", user);
+        list.put(user.getId(), user);
+        log.info(ADD_MODEL.getMessage(), user);
         return user;
     }
 
-    public User updateUser(User user) {
+    @Override
+    public User update(User user) {
         dataValidatorUser(user);
-        if (!users.containsKey(user.getId())) {
-            log.error("model Film by iD - " + user.getId() + " not found");
-            throw new ValidationException("Пользователя c ИД " + user.getId() + " не найден.");
+        if (!list.containsKey(user.getId())) {
+            log.error(MODEL_NOT_FOUND.getMessage() + user.getId());
+            throw new ValidationException(MODEL_NOT_FOUND.getMessage() + user.getId());
         }
         updateName(user);
-        users.put(user.getId(), user);
-        log.info("{} added to the service ", user);
+        list.put(user.getId(), user);
+        log.info(UPDATED_MODEL.getMessage(), user);
         return user;
     }
 }
