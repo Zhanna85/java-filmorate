@@ -1,57 +1,60 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import static ru.yandex.practicum.filmorate.message.Message.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@Slf4j
-public class UserService extends Service<User>{
+@Service
+public class UserService {
 
-    private void dataValidatorUser(User user) {
-        if (user.getEmail().isBlank()) {
-            log.error(EMAIL_CANNOT_BE_EMPTY.getMessage());
-            throw new ValidationException(EMAIL_CANNOT_BE_EMPTY.getMessage());
-        }
-        if (user.getLogin().contains(" ")){
-            log.error(LOGIN_MAY_NOT_CONTAIN_SPACES.getMessage());
-            throw new ValidationException(LOGIN_MAY_NOT_CONTAIN_SPACES.getMessage());
-        }
+    private final UserStorage storage;
+
+    @Autowired
+    public UserService(UserStorage storage) {
+        this.storage = storage;
     }
 
-    private void updateName(User user) {
-        String name = user.getName();
-        if (name == null || name.isBlank()) {
-            user.setName(user.getLogin());
-        }
+    public void putFriend(long id, long friendId) {
+        User user = storage.find(id);
+        User friend = storage.find(friendId);
+        user.addFriend(friendId);
+        friend.addFriend(id);
     }
 
-    @Override
-    public User add(User user) {
-        dataValidatorUser(user);
-        if (list.containsValue(user)) {
-            log.error(DUPLICATE.getMessage());
-            throw new ValidationException(DUPLICATE.getMessage());
-        }
-        generateID++;
-        user.setId(generateID);
-        updateName(user);
-        list.put(user.getId(), user);
-        log.info(ADD_MODEL.getMessage(), user);
-        return user;
+    public void deleteFriend(long id, long friendId) {
+        User user = storage.find(id);
+        User friend = storage.find(friendId);
+        user.removeFriend(friendId);
+        friend.removeFriend(id);
     }
 
-    @Override
-    public User update(User user) {
-        dataValidatorUser(user);
-        if (!list.containsKey(user.getId())) {
-            log.error(MODEL_NOT_FOUND.getMessage() + user.getId());
-            throw new ValidationException(MODEL_NOT_FOUND.getMessage() + user.getId());
+    public List<User> getFriends(long id) {
+        List<User> friends = new ArrayList<>();
+        User user = storage.find(id);
+        for (Long idFriend : user.getListFriends()) {
+            friends.add(storage.find(idFriend));
         }
-        updateName(user);
-        list.put(user.getId(), user);
-        log.info(UPDATED_MODEL.getMessage(), user);
-        return user;
+        return friends;
+    }
+
+    public List<User> getListMutualFriends(long id, long otherId) {
+        User user = storage.find(id);
+        User other = storage.find(otherId);
+        List<User> friends = new ArrayList<>();
+
+        Set<Long> intersectFriends = user.getListFriends().stream()
+                .filter(other.getListFriends()::contains)
+                .collect(Collectors.toSet());
+
+        for (Long idFriend : intersectFriends) {
+            friends.add(storage.find(idFriend));
+        }
+        return friends;
     }
 }

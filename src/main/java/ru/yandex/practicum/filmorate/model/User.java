@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class User {
 
-    private int  id; // целочисленный идентификатор
+    private long  id; // целочисленный идентификатор
     @Email
     private String email; // электронная почта
     @NotBlank
@@ -24,4 +27,14 @@ public class User {
     private String name; // имя для отображения
     @PastOrPresent
     private LocalDate birthday; // дата рождения
+    @JsonIgnore
+    private final Set<Long> listFriends = new HashSet<>(); // список друзей
+
+    public void addFriend(Long id) {
+        listFriends.add(id);
+    }
+
+    public void removeFriend(Long id) {
+        listFriends.remove(id);
+    }
 }
