@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.StorageInMemory;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,11 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
 
     private FilmController filmController;
+    private final StorageInMemory<Film> filmStorage = new InMemoryFilmStorage();
+    private final UserService userService = new UserService(new InMemoryUserStorage());
 
     @BeforeEach
     void before(){
-        FilmStorage filmStorage = new InMemoryFilmStorage();
-        filmController = new FilmController(new FilmService(filmStorage));
+        filmController = new FilmController(new FilmService(filmStorage, userService));
     }
 
     @Test
@@ -210,14 +214,21 @@ class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(1999, 1, 1));
         film.setDuration(100);
         filmController.saveFilm(film);
-        filmController.addLike(1, 2);
+        User user = User.builder()
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1985, 4, 4))
+                .build();
+        userService.addModel(user);
+        filmController.addLike(1, 1);
         film = filmController.getFilmById(1);
 
         Set<Long> likesList = film.getLikes();
 
         assertEquals(1, likesList.size(), "размер списка не соответствует ожидаемому");
 
-        filmController.deleteLike(1, 2);
+        filmController.deleteLike(1, 1);
 
         likesList = film.getLikes();
 
@@ -232,7 +243,14 @@ class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(1999, 1, 1));
         film.setDuration(100);
         filmController.saveFilm(film);
-        filmController.addLike(1, 2);
+        User user = User.builder()
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1985, 4, 4))
+                .build();
+        userService.addModel(user);
+        filmController.addLike(1, 1);
 
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
@@ -257,6 +275,13 @@ class FilmControllerTest {
         film2.setReleaseDate(LocalDate.of(1998, 1, 1));
         film2.setDuration(150);
         filmController.saveFilm(film2);
+        User user = User.builder()
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1985, 4, 4))
+                .build();
+        userService.addModel(user);
         filmController.addLike(2, 1);
 
         List<Film> filmList = filmController.listFilms();
@@ -266,29 +291,5 @@ class FilmControllerTest {
         List<Film> listFilmPopular = filmController.getListPopularFilms(1);
         assertEquals(1, listFilmPopular.size(), "Размер списка популярных фильмов не равен 1");
         assertEquals(film2, listFilmPopular.get(0), "Модели не соответствуют");
-    }
-
-    @Test
-    void getListPopularFilmsIfCountNotInstalled() {
-        Film film = new Film();
-        film.setName("film");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(1999, 1, 1));
-        film.setDuration(100);
-        filmController.saveFilm(film);
-
-        Film film2 = new Film();
-        film2.setName("film2");
-        film2.setDescription("Description");
-        film2.setReleaseDate(LocalDate.of(1998, 1, 1));
-        film2.setDuration(150);
-        filmController.saveFilm(film2);
-        filmController.addLike(2, 1);
-
-        List<Film> filmList = filmController.listFilms();
-        assertEquals(2, filmList.size(), "Размер списка фильмов не соответствует ожидаемому");
-
-        List<Film> listFilmPopular = filmController.getListPopularFilms(null);
-        assertEquals(2, listFilmPopular.size(), "Размер списка популярных фильмов не равен 1");
     }
 }

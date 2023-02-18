@@ -11,7 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Film extends AbstractModel {

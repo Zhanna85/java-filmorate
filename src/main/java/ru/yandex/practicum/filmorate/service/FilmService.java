@@ -7,10 +7,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.yandex.practicum.filmorate.Constants.COMPARATOR;
 import static ru.yandex.practicum.filmorate.Constants.DATE;
 import static ru.yandex.practicum.filmorate.message.Message.*;
 
@@ -18,9 +18,10 @@ import static ru.yandex.practicum.filmorate.message.Message.*;
 @Service
 public class FilmService extends AbstractService<Film> {
 
-    private final Storage<Film> storage;
+    private final UserService userService;
 
-    public FilmService(Storage<Film> storage) {
+    public FilmService(Storage<Film> storage, UserService userService) {
+        this.userService = userService;
         this.storage = storage;
     }
 
@@ -34,11 +35,13 @@ public class FilmService extends AbstractService<Film> {
 
     public void putLike(long id, long userId) {
         Film film = storage.find(id);
+        userService.containsUser(userId);
         film.addLike(userId);
     }
 
     public void deleteLike(long id, long userId) {
         Film film = storage.find(id);
+        userService.containsUser(userId);
         if (!film.removeLike(userId)) {
             log.error(MODEL_NOT_FOUND.getMessage() + userId);
             throw new NotFoundException(MODEL_NOT_FOUND.getMessage() + userId);
@@ -47,7 +50,7 @@ public class FilmService extends AbstractService<Film> {
 
     public List<Film> getPopularFilms(Integer count) {
         return (storage.getAll()
-                .stream().sorted(Comparator.comparing(Film::getSizeListLikes).reversed()))
+                .stream().sorted(COMPARATOR))
                 .limit(count)
                 .collect(Collectors.toList());
     }

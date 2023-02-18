@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,10 +17,8 @@ import static ru.yandex.practicum.filmorate.message.Message.LOGIN_MAY_NOT_CONTAI
 @Service
 public class UserService extends AbstractService<User> {
 
-    private final UserStorage storage;
-
     @Autowired
-    public UserService(UserStorage storage) {
+    public UserService(Storage<User> storage) {
         this.storage = storage;
     }
 
@@ -43,30 +41,6 @@ public class UserService extends AbstractService<User> {
             user.setName(user.getLogin());
         }
     }
-
-    /*public User addUser(User user) {
-        dataValidator(user);
-        updateName(user);
-        return storage.add(user);
-    }
-
-    public User updateUser(User user) {
-        dataValidator(user);
-        updateName(user);
-        return storage.update(user);
-    }
-
-    public void deleteUserById(long id) {
-        storage.delete(id);
-    }
-
-    public User findUserById(long id) {
-        return storage.find(id);
-    }
-
-    public List<User> getAllUsers() {
-        return storage.getAll();
-    }*/
 
     public void putFriend(long id, long friendId) {
         User user = storage.find(id);
@@ -96,5 +70,9 @@ public class UserService extends AbstractService<User> {
                 .filter(other.getListFriends()::contains)
                 .map(storage::find)
                 .collect(Collectors.toList());
+    }
+
+    protected void containsUser(long id) {
+        storage.find(id);
     }
 }

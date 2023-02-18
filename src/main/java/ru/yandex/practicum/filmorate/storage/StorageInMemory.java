@@ -42,7 +42,6 @@ public abstract class StorageInMemory<T extends AbstractModel> implements Storag
     public T update(T data) {
         validationContain(data.getId());
         list.put(data.getId(), data);
-        log.info(UPDATED_MODEL.getMessage(), data);
         return data;
     }
 
