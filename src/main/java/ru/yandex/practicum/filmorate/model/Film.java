@@ -11,12 +11,11 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(exclude = {"id"})
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Film {
+public class Film extends AbstractModel {
 
-    private long id; // целочисленный идентификатор
     @NotBlank
     private String name; // название
     @Size(max = 200)

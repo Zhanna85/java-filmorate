@@ -13,11 +13,11 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(exclude = {"id"})
+@EqualsAndHashCode(exclude = {"id"}, callSuper = false)
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class User {
+public class User extends AbstractModel{
 
     private long  id; // целочисленный идентификатор
     @Email

@@ -1,68 +1,67 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import javax.validation.Valid;
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.message.Message.ADD_MODEL;
-import static ru.yandex.practicum.filmorate.message.Message.UPDATED_MODEL;
+import static ru.yandex.practicum.filmorate.message.Message.*;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
 
-    private final FilmStorage storage;
     private final FilmService filmService;
 
-    @Autowired
-    public FilmController(FilmStorage storage, FilmService filmService) {
-        this.storage = storage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
     @PostMapping
     public Film saveFilm(@Valid @RequestBody Film film) {
         log.info(ADD_MODEL.getMessage(), film);
-        storage.add(film);
+        filmService.addModel(film);
         return film;
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         log.info(UPDATED_MODEL.getMessage(), film);
-        storage.update(film);
+        filmService.updateModel(film);
         return film;
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable long id, @PathVariable long userId) {
+        log.info(REQUEST_TO_LIKE.getMessage(), id, userId);
         filmService.putLike(id, userId);
     }
 
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable long id) {
-        return storage.find(id);
+        log.info(REQUEST_BY_ID.getMessage(), id);
+        return filmService.findModelById(id);
     }
 
     @GetMapping
     public List<Film> listFilms() {
-        return storage.getAll();
+        log.info(REQUEST_ALL.getMessage());
+        return filmService.getAllModels();
     }
 
-    @GetMapping({"/popular?count={count}", "/popular"})
-    public List<Film> getListPopularFilms(@RequestParam(required = false) Integer count) {
+    @GetMapping({"/popular"})
+    public List<Film> getListPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+        log.info(REQUEST_POPULAR.getMessage());
         return filmService.getPopularFilms(count);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable long id, @PathVariable long userId) {
+        log.info(DELETE_LIKE.getMessage(), id, userId);
         filmService.deleteLike(id, userId);
     }
 }

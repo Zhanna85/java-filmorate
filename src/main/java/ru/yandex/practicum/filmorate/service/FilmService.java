@@ -1,29 +1,35 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNullElse;
-import static ru.yandex.practicum.filmorate.Constants.NUMBER_POPULAR_MOVIES;
-import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
+import static ru.yandex.practicum.filmorate.Constants.DATE;
+import static ru.yandex.practicum.filmorate.message.Message.*;
 
 @Slf4j
 @Service
-public class FilmService {
+public class FilmService extends AbstractService<Film> {
 
-    private final FilmStorage storage;
+    private final Storage<Film> storage;
 
-    @Autowired
-    public FilmService(FilmStorage storage) {
+    public FilmService(Storage<Film> storage) {
         this.storage = storage;
+    }
+
+    @Override
+    protected void dataValidator(Film film) {
+        if (film.getReleaseDate().isBefore(DATE)) {
+            log.error(RELEASE_DATE.getMessage() + DATE);
+            throw new ValidationException(RELEASE_DATE.getMessage() + DATE);
+        }
     }
 
     public void putLike(long id, long userId) {
@@ -42,7 +48,7 @@ public class FilmService {
     public List<Film> getPopularFilms(Integer count) {
         return (storage.getAll()
                 .stream().sorted(Comparator.comparing(Film::getSizeListLikes).reversed()))
-                .limit(requireNonNullElse(count, NUMBER_POPULAR_MOVIES))
+                .limit(count)
                 .collect(Collectors.toList());
     }
 }
