@@ -1,19 +1,21 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(exclude = {"id"})
+@EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Film {
+public class Film extends AbstractModel {
 
-    private int id; // целочисленный идентификатор
     @NotBlank
     private String name; // название
     @Size(max = 200)
@@ -22,4 +24,18 @@ public class Film {
     private LocalDate releaseDate; // дата релиза
     @Positive
     private long duration; // продолжительность фильма
+    @JsonIgnore
+    private Set<Long> likes = new HashSet<>(); // лайки
+
+    public void addLike(Long id) {
+        likes.add(id);
+    }
+
+    public boolean removeLike(Long id) {
+        return likes.remove(id);
+    }
+
+    public int getSizeListLikes() {
+        return likes.size();
+    }
 }

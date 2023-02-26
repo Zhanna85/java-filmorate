@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +20,8 @@ class UserControllerTest {
 
     @BeforeEach
     void before() {
-        userController = new UserController();
+        UserStorage storage = new InMemoryUserStorage();
+        userController = new UserController(new UserService(storage));
     }
 
     @Test
@@ -195,10 +200,95 @@ class UserControllerTest {
                 .birthday(LocalDate.of(1985, 5, 4))
                 .build();
 
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
                 () -> userController.updateUser(user2));
         assertEquals("model was not found by the passed ID: 3", exception.getMessage()
                 , "exception проверки неверный");
+    }
+
+    @Test
+    void getByIdUser() {
+        User user = User.builder()
+                .email("mail@mail.ru")
+                .login("login")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1985, 4, 4))
+                .build();
+        userController.createUser(user);
+        User user2 = User.builder()
+                .email("mail@yandex.ru")
+                .login("dolore2")
+                .name("Nick Name 2")
+                .birthday(LocalDate.of(1986, 4, 4))
+                .build();
+        userController.createUser(user2);
+        List<User> usersList = userController.getListUsers();
+
+        assertEquals(2, usersList.size(), "Размер списка неверно указан");
+        assertEquals(2, usersList.get(1).getId(), "ID сформирован не верно");
+        assertEquals(user2, userController.getUser(2), "Модели User не соответствуют");
+    }
+
+    @Test
+    void findUserByInvalidIDShouldThrowException() {
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> userController.getUser(2));
+        assertEquals("model was not found by the passed ID: 2", exception.getMessage()
+                , "exception проверки неверный");
+    }
+
+    @Test
+    void addAndDeleteFriend() {
+        User user = User.builder()
+                .email("mail@mail.ru")
+                .login("login")
+                .name("Nick Name")
+                .birthday(LocalDate.of(1985, 4, 4))
+                .build();
+        user = userController.createUser(user);
+        User friend = User.builder()
+                .email("mail@yandex.ru")
+                .login("dolore2")
+                .name("Nick Name 2")
+                .birthday(LocalDate.of(1986, 4, 4))
+                .build();
+        friend = userController.createUser(friend);
+
+        userController.addFriend(user.getId(), friend.getId());
+        List<User> listUser = userController.getListFriends(user.getId());
+        List<User> listFriends = userController.getListFriends(friend.getId());
+
+        assertEquals(1, listUser.size(), "Размер списка друзей User не соответствуют");
+        assertEquals(1, listFriends.size(), "Размер списка друзей Friend не соответствуют");
+        assertEquals(friend, listUser.get(0), "Значение списка друзей User не верное");
+        assertEquals(user, listFriends.get(0), "Значение списка друзей Friend не верное");
+
+        User user2 = User.builder()
+                .email("mail2@yandex.ru")
+                .login("dolore3")
+                .name("Nick Name 3")
+                .birthday(LocalDate.of(1986, 4, 5))
+                .build();
+        user2 = userController.createUser(user2);
+
+        userController.addFriend(user.getId(), user2.getId());
+        userController.addFriend(friend.getId(), user2.getId());
+        listUser = userController.getListFriends(user.getId());
+        listFriends = userController.getListFriends(friend.getId());
+        List<User> listMutualFriends = userController.getMutualFriends(user.getId(), friend.getId());
+
+        assertEquals(2, listUser.size(), "Размер списка друзей User не соответствуют");
+        assertEquals(2, listFriends.size(), "Размер списка друзей Friend не соответствуют");
+        assertEquals(1, listMutualFriends.size(), "Размер списка общих друзей не равен 1");
+        assertEquals(user2, listMutualFriends.get(0), "Значение в списке общих друзей не соответствует.");
+
+        userController.deleteFriend(user.getId(), friend.getId());
+        listUser = userController.getListFriends(user.getId());
+        listFriends = userController.getListFriends(friend.getId());
+
+        assertEquals(1, listUser.size(), "Размер списка друзей User не соответствуют");
+        assertEquals(1, listFriends.size(), "Размер списка друзей Friend не соответствуют");
     }
 }
