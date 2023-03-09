@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,8 +26,7 @@ public class Film extends AbstractModel {
     private long duration; // продолжительность фильма
     @JsonIgnore
     private Set<Long> likes = new HashSet<>(); // лайки
-    @Positive
-    private int id_rating; // id рейтинга
+    private Mpa mpa; // id рейтинга
     private Set<Integer> genres = new HashSet<>(); // жанры
 
     public void addLike(Long id) {

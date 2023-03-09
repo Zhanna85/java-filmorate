@@ -1,33 +1,106 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.dao.mapper.GenreMapper;
+import ru.yandex.practicum.filmorate.dao.mapper.MpaMapper;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
+
+@Slf4j
+@Component
+@Primary
 public class FilmDbStorage implements FilmStorage {
+    private final JdbcTemplate jdbcTemplate;
+
+    public FilmDbStorage(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate=jdbcTemplate;
+    }
+
     @Override
     public Film add(Film data) {
+        String sql = "INSERT INTO films (name, description, release_date, duration, rating_id) VALUES (?, ?, ?, ?)";
         return null;
     }
 
     @Override
     public Film update(Film data) {
-        return null;
+        String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?," +
+                "rating_id = ? WHERE film_id = ?";
+        int count = jdbcTemplate.update(sql, data.getName(), data.getDescription(), data.getReleaseDate(),
+                data.getDuration(), data.getId());
+        if (count == 0) {
+            log.error(MODEL_NOT_FOUND.getMessage() + data.getId());
+            throw new NotFoundException(MODEL_NOT_FOUND.getMessage() + data.getId());
+        }
+        return find(data.getId());
     }
 
     @Override
     public void delete(long id) {
-
+        String sql = "DELETE FROM films WHERE film_id = ?";
+        jdbcTemplate.update(sql, new FilmMapper(), id);
     }
 
     @Override
     public Film find(long id) {
-        return null;
+        String sql = "SELECT * FROM films WHERE film_id = ?";
+        return jdbcTemplate.query(sql, new FilmMapper(), id)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + id));
     }
 
     @Override
     public List<Film> getAll() {
-        return null;
+        String sql = "SELECT * FROM films";
+        return jdbcTemplate.query(sql, new FilmMapper());
+    }
+
+    public void putLike(long id, long userId) {
+        String sql = "INSERT INTO popular_films (film_id, user_id) VALUES (?, ?)";
+        jdbcTemplate.update(sql, id, userId);
+    }
+
+    public void deleteLike(long id, long userId) {
+        String sql = "DELETE FROM popular_films WHERE film_id = ? AND user_id = ?)";
+        jdbcTemplate.update(sql, id, userId);
+    }
+
+    public List<Genre> getGenres() {
+        String sql = "SELECT * FROM genre";
+        return jdbcTemplate.query(sql, new GenreMapper());
+    }
+
+    public Genre getGenreById(int genreId) {
+        String sql = "SELECT * FROM genre WHERE genre_id = ?";
+        return jdbcTemplate.query(sql, new GenreMapper(), genreId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + genreId));
+
+    }
+
+    public List<Mpa> getRatings() {
+        String sql = "SELECT rating_id, name_rating FROM ratings";
+        return jdbcTemplate.query(sql, new MpaMapper());
+    }
+
+    public Mpa getRatingById(int ratingId) {
+        String sql = "SELECT rating_id, name_rating FROM ratings WHERE rating_id = ?";
+        return jdbcTemplate.query(sql, new MpaMapper(), ratingId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + ratingId));
     }
 }

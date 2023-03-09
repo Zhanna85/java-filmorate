@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class Ratings {
+@Setter
+public class Mpa {
+    private int id;
     private String nameRating;
     private String description;
 }

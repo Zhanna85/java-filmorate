@@ -27,14 +27,4 @@ public class User extends AbstractModel{
     private String name; // имя для отображения
     @PastOrPresent
     private LocalDate birthday; // дата рождения
-    @JsonIgnore
-    private final Set<Long> listFriends = new HashSet<>(); // список друзей
-
-    public void addFriend(Long id) {
-        listFriends.add(id);
-    }
-
-    public void removeFriend(Long id) {
-        listFriends.remove(id);
-    }
 }
