@@ -3,13 +3,15 @@ package ru.yandex.practicum.filmorate.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.message.Message.*;
@@ -25,15 +27,20 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User add(User data) { //пересмотреть метод, поискать как вернуть ид?
+    public User add(User data) {
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        int count = jdbcTemplate.update(sql, data.getEmail(), data.getLogin(), data.getName(), data.getBirthday());
-        if (count == 0 ) {
-            log.error(DUPLICATE.getMessage());
-            throw new ValidationException(DUPLICATE.getMessage());
-        }
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement psst = connection.prepareStatement(sql,  new String[] { "user_id" });
+            psst.setString(1, data.getEmail());
+            psst.setString(2, data.getLogin());
+            psst.setString(3, data.getName());
+            psst.setDate(4, Date.valueOf(data.getBirthday()));
+            return psst;
+        }, keyHolder);
+        data.setId(keyHolder.getKey().longValue());
         log.info(ADD_MODEL.getMessage(), data);
-        return find(data.getId());
+        return data;
     }
 
     @Override

@@ -1,11 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -23,21 +21,7 @@ public class Film extends AbstractModel {
     @NotNull
     private LocalDate releaseDate; // дата релиза
     @Positive
-    private long duration; // продолжительность фильма
-    @JsonIgnore
-    private Set<Long> likes = new HashSet<>(); // лайки
+    private int duration; // продолжительность фильма
     private Mpa mpa; // id рейтинга
-    private Set<Integer> genres = new HashSet<>(); // жанры
-
-    public void addLike(Long id) {
-        likes.add(id);
-    }
-
-    public boolean removeLike(Long id) {
-        return likes.remove(id);
-    }
-
-    public int getSizeListLikes() {
-        return likes.size();
-    }
+    private Set<Genre> genres; // жанры
 }
