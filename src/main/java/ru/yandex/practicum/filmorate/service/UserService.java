@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.message.Message.EMAIL_CANNOT_BE_EMPTY;
@@ -15,14 +17,11 @@ import static ru.yandex.practicum.filmorate.message.Message.LOGIN_MAY_NOT_CONTAI
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService extends AbstractService<User> {
 
-    @Autowired
-    public UserService(Storage<User> storage) {
-        this.storage = storage;
-    }
+    private final UserStorage userStorage;
 
-    @Override
     protected void dataValidator(User data) {
         if (data.getEmail().isBlank()) {
             log.error(EMAIL_CANNOT_BE_EMPTY.getMessage());
@@ -42,37 +41,52 @@ public class UserService extends AbstractService<User> {
         }
     }
 
+    @Override
+    public User addModel(User data) {
+        super.addModel(data);
+        return userStorage.add(data);
+    }
+
+    @Override
+    public User updateModel(User data) {
+        super.updateModel(data);
+        return userStorage.update(data);
+    }
+
+    @Override
+    public void deleteModelById(long id) {
+        userStorage.delete(id);
+    }
+
+    @Override
+    public User findModelById(long id) {
+        return userStorage.find(id);
+    }
+
+    @Override
+    public List<User> getAllModels() {
+        return userStorage.getAll();
+    }
+
     public void putFriend(long id, long friendId) {
-        User user = storage.find(id);
-        User friend = storage.find(friendId);
-        user.addFriend(friendId);
-        friend.addFriend(id);
+        userStorage.find(id);
+        userStorage.find(friendId);
+        userStorage.putFriend(id, friendId);
     }
 
     public void deleteFriend(long id, long friendId) {
-        User user = storage.find(id);
-        User friend = storage.find(friendId);
-        user.removeFriend(friendId);
-        friend.removeFriend(id);
+        userStorage.deleteFriend(id, friendId);
     }
 
     public List<User> getFriends(long id) {
-        User user = storage.find(id);
-        return user.getListFriends().stream()
-                .map(storage::find)
-                .collect(Collectors.toList());
+        return userStorage.getFriends(id);
     }
 
     public List<User> getListMutualFriends(long id, long otherId) {
-        User user = storage.find(id);
-        User other = storage.find(otherId);
-        return user.getListFriends().stream()
-                .filter(other.getListFriends()::contains)
-                .map(storage::find)
+        Set<User> usersFriends = new HashSet<>(userStorage.getFriends(id));
+        Set<User> otherFriends = new HashSet<>(userStorage.getFriends(otherId));
+        return usersFriends.stream()
+                .filter(otherFriends::contains)
                 .collect(Collectors.toList());
-    }
-
-    protected void containsUser(long id) {
-        storage.find(id);
     }
 }
