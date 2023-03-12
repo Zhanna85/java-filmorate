@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,5 +24,7 @@ public class Film extends AbstractModel {
     @Positive
     private int duration; // продолжительность фильма
     private Mpa mpa; // id рейтинга
-    private Set<Genre> genres; // жанры
+    private List<Genre> genres; // жанры
+    @JsonIgnore
+    private int rate;
 }

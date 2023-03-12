@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao.mapper;
+package ru.yandex.practicum.filmorate.storage.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -11,7 +11,7 @@ public class MpaMapper implements RowMapper<Mpa> {
     public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("rating_id"));
-        mpa.setNameRating(rs.getString("name_rating"));
+        mpa.setName(rs.getString("name_rating"));
         return mpa;
     }
 }

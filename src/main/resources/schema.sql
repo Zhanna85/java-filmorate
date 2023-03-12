@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS films (
   description varchar(200),
   release_date date NOT NULL,
   duration int NOT NULL,
-  rating_id int NOT NULL REFERENCES ratings (rating_id)
+  rating_id int NOT NULL REFERENCES ratings (rating_id),
+  count_likes int
 );
  
 CREATE TABLE IF NOT EXISTS friends (

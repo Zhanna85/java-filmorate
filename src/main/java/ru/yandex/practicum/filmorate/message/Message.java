@@ -16,7 +16,11 @@ public enum Message {
     REQUEST_LIST_FRIENDS("Received a request for a list of friends user {}"),
     REQUEST_MUTUAL_FRIENDS("Received a request from the user {} for a list of mutual friends with the user {}"),
     DELETE_FRIENDS("Received a request to delete a friend {} from a user {}"),
-    DELETE_LIKE("Received a request to remove the like of the movie {} from the user {}");
+    DELETE_LIKE("Received a request to remove the like of the movie {} from the user {}"),
+    REQUEST_ALL_GENRES("Request genres"),
+    REQUEST_ALL_MPA("Request MPA"),
+    REQUEST_GENRE("Request genre by ID {}"),
+    REQUEST_MPA("Request MPA by ID {}");
 
     private final String message;
 

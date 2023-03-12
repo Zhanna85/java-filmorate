@@ -1,14 +1,13 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -76,18 +75,21 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query(sql, new UserMapper());
     }
 
+    @Override
     public void putFriend(long id, long friendId) {
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, id, friendId);
     }
 
+    @Override
     public void deleteFriend(long id, long friendId) {
         String sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, id, friendId);
     }
 
+    @Override
     public List<User> getFriends(long id){
-        String sql = "SELECT * FROM users WHERE user_id = (SELECT friend_id FROM friends WHERE user_id = ?)";
+        String sql = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?)";
         return jdbcTemplate.query(sql, new UserMapper(), id);
     }
 }
