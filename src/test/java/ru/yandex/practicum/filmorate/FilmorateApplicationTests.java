@@ -98,8 +98,10 @@ class FilmorateApplicationTests {
 		film3.setMpa(mpa2);
 		filmService.addModel(film3);
 		filmService.putLike(2, 1);
+		List<Film> films = filmService.getAllModels();
 		List<Film> popularFilms = filmService.getPopularFilms(2);
 
+		assertEquals(films.size(), popularFilms.size(), "Размеры списков не равны.");
 		assertEquals(2, popularFilms.get(0).getId(), "ИД популярного фильма в списке не равен 2.");
 
 		filmService.deleteLike(2, 1);

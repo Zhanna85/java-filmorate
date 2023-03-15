@@ -1,20 +1,18 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.MpaMapper;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,13 +20,10 @@ import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 
 @Slf4j
 @Component
-
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate=jdbcTemplate;
-    }
+    private final FilmMapper filmMapper;
 
     private void updateGenreByFilm(Film data) {
         final long filmId = data.getId();
@@ -47,7 +42,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private List<Genre> getGenreByIdFilm(long id) {
+/*    private List<Genre> getGenreByIdFilm(long id) {
         String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
                 "ORDER BY genre_id ASC";
         return jdbcTemplate.query(sql, new GenreMapper(), id);
@@ -66,16 +61,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenreByIdFilm(rs.getLong("film_id")));
         film.setRate(rs.getInt("count_likes"));
         return film;
-    }
-
-    @Override
-    public Mpa getRatingById(int ratingId) {
-        final String sql = "SELECT * FROM ratings WHERE rating_id = ?";
-        return jdbcTemplate.query(sql, new MpaMapper(), ratingId)
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + ratingId));
-    }
+    }*/
 
     @Override
     public Film add(Film data) {
@@ -122,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film find(long id) {
         final String sql = "SELECT * FROM films WHERE film_id = ?";
-        return jdbcTemplate.query(sql, ((rs, rowNum) -> mapRow(rs)), id)
+        return jdbcTemplate.query(sql, /*((rs, rowNum) -> mapRow(rs))*/ filmMapper/*new FilmMapper()*/, id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + id));
@@ -131,44 +117,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAll() {
         final String sql = "SELECT * FROM films ORDER BY film_id ASC";
-        return jdbcTemplate.query(sql, ((rs, rowNum) -> mapRow(rs)));
-    }
-
-    @Override
-    public void putLike(long id, long userId) {
-        final String sql = "INSERT INTO popular_films (film_id, user_id) VALUES (?, ?)";
-        jdbcTemplate.update(sql, id, userId);
-        final String sqlAddLike = "UPDATE films SET count_likes = count_likes + 1 WHERE film_id=?";
-        jdbcTemplate.update(sqlAddLike, id);
-    }
-
-    @Override
-    public void deleteLike(long id, long userId) {
-        final String sql = "DELETE FROM popular_films WHERE film_id = ? AND user_id = ?";
-        jdbcTemplate.update(sql, id, userId);
-        final String sqlDeleteLike = "UPDATE films SET count_likes = count_likes - 1 WHERE film_id=?";
-        jdbcTemplate.update(sqlDeleteLike, id);
-    }
-
-    @Override
-    public List<Genre> getGenres() {
-        final String sql = "SELECT * FROM genre ORDER BY genre_id ASC";
-        return jdbcTemplate.query(sql, new GenreMapper());
-    }
-
-    @Override
-    public Genre getGenreById(int genreId) {
-        final String sql = "SELECT * FROM genre WHERE genre_id = ?";
-        return jdbcTemplate.query(sql, new GenreMapper(), genreId)
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + genreId));
-
-    }
-
-    @Override
-    public List<Mpa> getRatings() {
-        final String sql = "SELECT rating_id, name_rating FROM ratings ORDER BY rating_id ASC";
-        return jdbcTemplate.query(sql, new MpaMapper());
+        return jdbcTemplate.query(sql, /*((rs, rowNum) -> mapRow(rs))*/ filmMapper/*new FilmMapper()*/);
     }
 }

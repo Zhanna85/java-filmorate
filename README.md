@@ -119,12 +119,12 @@ FROM users;
 ```
 2. **Список общих друзей с другим пользователем**:
 ```
-SELECT id_friend
+SELECT friend_id
 FROM friends
-WHERE id_user = 2
-AND id_friend in (SELECT id_friend
+WHERE user_id = 2
+AND friend_id in (SELECT friend_id
                   FROM friends
-                  WHERE id_user = 1);
+                  WHERE user_id = 1);
 ```
 3. **Вывод 10 наиболее популярных фильмов**:
 ```

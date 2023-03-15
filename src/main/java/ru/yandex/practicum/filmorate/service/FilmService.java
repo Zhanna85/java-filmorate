@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.impl.LikeDbStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import static ru.yandex.practicum.filmorate.message.Message.*;
 public class FilmService extends AbstractService<Film> {
 
     private final FilmStorage filmStorage;
+    private final LikeDbStorage likeDbStorage;
     private final UserService userService;
 
     protected void dataValidator(Film film) {
@@ -61,35 +63,20 @@ public class FilmService extends AbstractService<Film> {
     public void putLike(long id, long userId) {
         filmStorage.find(id); // Проверяем есть ли такой фильм.
         userService.findModelById(userId); // Проверяем есть ли такой Id таблице users, иначе будет исключение.
-        filmStorage.putLike(id, userId);
+        likeDbStorage.putLike(id, userId);
     }
 
     public void deleteLike(long id, long userId) {
         filmStorage.find(id); // Проверяем есть ли такой фильм.
         userService.findModelById(userId); // Проверяем есть ли такой Id таблице users, иначе будет исключение.
-        filmStorage.deleteLike(id, userId);
+        likeDbStorage.deleteLike(id, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return (filmStorage.getAll()
+        return /*(filmStorage.getAll()
                 .stream().sorted(COMPARATOR))
                 .limit(count)
-                .collect(Collectors.toList());
-    }
-
-    public List<Genre> getGenres() {
-        return filmStorage.getGenres();
-    }
-
-    public Genre getGenreById(int genreId) {
-        return filmStorage.getGenreById(genreId);
-    }
-
-    public List<Mpa> getRatings() {
-        return filmStorage.getRatings();
-    }
-
-    public Mpa getRatingById(int ratingId) {
-        return filmStorage.getRatingById(ratingId);
+                .collect(Collectors.toList());*/
+        likeDbStorage.getPopularFilms(count);
     }
 }

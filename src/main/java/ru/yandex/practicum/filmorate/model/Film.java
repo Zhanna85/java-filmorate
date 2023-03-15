@@ -23,6 +23,7 @@ public class Film extends AbstractModel {
     private LocalDate releaseDate; // дата релиза
     @Positive
     private int duration; // продолжительность фильма
+    @NotNull
     private Mpa mpa; // id рейтинга
     private List<Genre> genres; // жанры
     @JsonIgnore

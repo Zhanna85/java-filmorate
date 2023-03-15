@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,8 @@ import static ru.yandex.practicum.filmorate.message.Message.LOGIN_MAY_NOT_CONTAI
 @RequiredArgsConstructor
 public class UserService extends AbstractService<User> {
 
-    private final UserStorage userStorage;
+    private final Storage<User> userStorage;
+    private final FriendStorage friendStorage;
 
     protected void dataValidator(User data) {
         if (data.getEmail().isBlank()) {
@@ -71,22 +73,23 @@ public class UserService extends AbstractService<User> {
     public void putFriend(long id, long friendId) {
         userStorage.find(id);
         userStorage.find(friendId);
-        userStorage.putFriend(id, friendId);
+        friendStorage.putFriend(id, friendId);
     }
 
     public void deleteFriend(long id, long friendId) {
-        userStorage.deleteFriend(id, friendId);
+        friendStorage.deleteFriend(id, friendId);
     }
 
     public List<User> getFriends(long id) {
-        return userStorage.getFriends(id);
+        return friendStorage.getFriends(id);
     }
 
     public List<User> getListMutualFriends(long id, long otherId) {
-        Set<User> usersFriends = new HashSet<>(userStorage.getFriends(id));
+        /*Set<User> usersFriends = new HashSet<>(userStorage.getFriends(id));
         Set<User> otherFriends = new HashSet<>(userStorage.getFriends(otherId));
         return usersFriends.stream()
                 .filter(otherFriends::contains)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
+        return  friendStorage.getListMutualFriends(id, otherId);
     }
 }
