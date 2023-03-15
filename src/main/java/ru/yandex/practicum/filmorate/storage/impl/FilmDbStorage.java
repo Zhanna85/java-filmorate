@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,10 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 
@@ -29,17 +32,22 @@ public class FilmDbStorage implements FilmStorage {
         final long filmId = data.getId();
         final String sql = "DELETE FROM film_genre WHERE film_id = ?";
         jdbcTemplate.update(sql, filmId);
-        final List<Genre> genres = data.getGenres();
+        final Set<Genre> genres = data.getGenres();
         if (genres == null || genres.isEmpty()) {
             return;
         }
-        final List<Genre> genresDistinct= genres.stream()
-                .distinct()
-                .collect(Collectors.toList());
-        for (Genre genre : genresDistinct) {
-            final String sqlInsert = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-            jdbcTemplate.update(sqlInsert, filmId, genre.getId());
-        }
+        List<Genre> genreList = new ArrayList<>(genres);
+        jdbcTemplate.batchUpdate("INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)",
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, data.getId());
+                        ps.setInt(2, genreList.get(i).getId());
+                    }
+
+                    public int getBatchSize() {
+                        return genreList.size();
+                    }
+                });
     }
 
     @Override

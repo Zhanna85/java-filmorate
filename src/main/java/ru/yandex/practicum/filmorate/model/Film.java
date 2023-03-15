@@ -6,6 +6,7 @@ import lombok.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,7 +26,8 @@ public class Film extends AbstractModel {
     private int duration; // продолжительность фильма
     @NotNull
     private Mpa mpa; // id рейтинга
-    private List<Genre> genres; // жанры
+    //private List<Genre> genres; // жанры
+    private Set<Genre> genres; // жанры
     @JsonIgnore
     private int rate;
 }

@@ -8,7 +8,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 
@@ -35,9 +37,9 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getGenreByIdFilm(long id) {
+    public Set<Genre> getGenreByIdFilm(long id) {
         String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
                 "ORDER BY genre_id ASC";
-        return jdbcTemplate.query(sql, new GenreMapper(), id);
+        return new HashSet<>(jdbcTemplate.query(sql, new GenreMapper(), id)) ;
     }
 }
