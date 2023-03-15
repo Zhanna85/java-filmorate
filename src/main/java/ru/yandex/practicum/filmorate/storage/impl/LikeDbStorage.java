@@ -30,7 +30,11 @@ public class LikeDbStorage {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        String sql = "SELECT * FROM films ORDER BY count_likes DESC, film_id ASC LIMIT ?";
+        String sql = "SELECT f.*, mpa.name_rating\n" +
+                "FROM films AS f, ratings AS mpa\n" +
+                "WHERE f.rating_id = mpa.rating_id\n" +
+                "ORDER BY f.count_likes DESC, film_id ASC\n" +
+                "LIMIT ?";
         return jdbcTemplate.query(sql, filmMapper, count);
     }
 }

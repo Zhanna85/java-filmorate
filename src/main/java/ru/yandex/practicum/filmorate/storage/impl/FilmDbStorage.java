@@ -86,7 +86,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film find(long id) {
-        final String sql = "SELECT * FROM films WHERE film_id = ?";
+        final String sql = "SELECT f.*, mpa.name_rating\n" +
+                "FROM films AS f, ratings AS mpa\n" +
+                "WHERE f.rating_id = mpa.rating_id\n" +
+                "AND f.film_id = ?";
         return jdbcTemplate.query(sql, filmMapper, id)
                 .stream()
                 .findAny()
@@ -95,7 +98,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        final String sql = "SELECT * FROM films ORDER BY film_id ASC";
+        final String sql = "SELECT f.*, mpa.name_rating\n" +
+                "FROM films AS f, ratings AS mpa\n" +
+                "WHERE f.rating_id = mpa.rating_id\n" +
+                "ORDER BY f.film_id ASC";
         return jdbcTemplate.query(sql,filmMapper);
     }
 }
