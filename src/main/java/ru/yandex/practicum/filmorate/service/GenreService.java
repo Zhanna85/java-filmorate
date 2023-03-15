@@ -10,8 +10,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GenreService {
-
     private final GenreDbStorage genreDbStorage;
+
     public List<Genre> getGenres() {
         return genreDbStorage.getGenres();
     }

@@ -34,6 +34,7 @@ public class UserDbStorage implements UserStorage {
             psst.setDate(4, Date.valueOf(data.getBirthday()));
             return psst;
         }, keyHolder);
+
         data.setId(keyHolder.getKey().longValue());
         log.info(ADD_MODEL.getMessage(), data);
         return data;
