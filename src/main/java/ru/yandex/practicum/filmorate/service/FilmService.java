@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.impl.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
 import static ru.yandex.practicum.filmorate.Constants.DATE;
@@ -17,8 +17,8 @@ import static ru.yandex.practicum.filmorate.message.Message.*;
 @RequiredArgsConstructor
 public class FilmService extends AbstractService<Film> {
 
-    private final FilmStorage filmStorage;
-    private final LikeDbStorage likeDbStorage;
+    private final Storage<Film> filmStorage;
+    private final LikeStorage likeDbStorage;
     private final UserService userService;
 
     protected void dataValidator(Film film) {
@@ -68,10 +68,6 @@ public class FilmService extends AbstractService<Film> {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return /*(filmStorage.getAll()
-                .stream().sorted(COMPARATOR))
-                .limit(count)
-                .collect(Collectors.toList());*/
-        likeDbStorage.getPopularFilms(count);
+        return likeDbStorage.getPopularFilms(count);
     }
 }

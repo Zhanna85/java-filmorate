@@ -13,11 +13,15 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +33,8 @@ class FilmorateApplicationTests {
 
 	private final UserService userService;
 	private final FilmService filmService;
+	private final GenreService genreService;
+	private final MpaService mpaService;
 	private User user;
 
 	private Film film;
@@ -74,7 +80,7 @@ class FilmorateApplicationTests {
 		genre.setId(1);
 		Genre genre2 = new Genre();
 		genre2.setId(3);
-		List<Genre> genres = new ArrayList<>();
+		Set<Genre> genres = new HashSet<>();
 		genres.add(genre);
 		genres.add(genre2);
 		film2.setGenres(genres);
@@ -172,33 +178,33 @@ class FilmorateApplicationTests {
 
 	@Test
 	void GetAllAndGetInvalidIdGenres() {
-		Genre genreById = filmService.getGenreById(1);
+		Genre genreById = genreService.getGenreById(1);
 		assertEquals("Комедия", genreById.getName(), "Название жанров не верное.");
 
-		List<Genre> genres = filmService.getGenres();
+		List<Genre> genres = genreService.getGenres();
 
 		assertEquals(6, genres.size(), "Размер жанров не соответствует ожидаемому.");
 
 		final NotFoundException exception3 = assertThrows(
 				NotFoundException.class,
-				() -> filmService.getGenreById(-2));
+				() -> genreService.getGenreById(-2));
 		assertEquals("model was not found by the passed ID: -2", exception3.getMessage()
 				, "exception проверки неверный");
 	}
 
 	@Test
 	void GetAllAndGetInvalidIdRatings() {
-		Mpa rating = filmService.getRatingById(1);
+		Mpa rating = mpaService.getRatingById(1);
 
 		assertEquals("G", rating.getName(), "Название рейтинга не верное.");
 
-		List<Mpa> ratings = filmService.getRatings();
+		List<Mpa> ratings = mpaService.getRatings();
 
 		assertEquals(5, ratings.size(), "Размер списка рейтингов не соответствует ожидаемому.");
 
 		final NotFoundException exception4 = assertThrows(
 				NotFoundException.class,
-				() -> filmService.getRatingById(-2));
+				() -> mpaService.getRatingById(-2));
 		assertEquals("model was not found by the passed ID: -2", exception4.getMessage()
 				, "exception проверки неверный");
 	}

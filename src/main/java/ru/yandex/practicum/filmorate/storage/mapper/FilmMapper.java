@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.impl.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
 @AllArgsConstructor
 public class FilmMapper implements RowMapper<Film> {
 
-    private GenreDbStorage genreDbStorage;
+    private GenreStorage genreDbStorage;
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
