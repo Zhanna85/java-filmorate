@@ -42,27 +42,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-/*    private List<Genre> getGenreByIdFilm(long id) {
-        String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
-                "ORDER BY genre_id ASC";
-        return jdbcTemplate.query(sql, new GenreMapper(), id);
-    }
-
-    private Film mapRow(ResultSet rs) throws SQLException {
-        Film film = new Film();
-        film.setId(rs.getLong("film_id"));
-        film.setName(rs.getString("name"));
-        film.setDescription(rs.getString("description"));
-        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-        film.setDuration(rs.getInt("duration"));
-        int mpaId = rs.getInt("rating_id");
-        Mpa mpa = getRatingById(mpaId);
-        film.setMpa(mpa);
-        film.setGenres(getGenreByIdFilm(rs.getLong("film_id")));
-        film.setRate(rs.getInt("count_likes"));
-        return film;
-    }*/
-
     @Override
     public Film add(Film data) {
         final String sql = "INSERT INTO films (name, description, release_date, duration, rating_id, count_likes)" +
@@ -108,7 +87,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film find(long id) {
         final String sql = "SELECT * FROM films WHERE film_id = ?";
-        return jdbcTemplate.query(sql, /*((rs, rowNum) -> mapRow(rs))*/ filmMapper/*new FilmMapper()*/, id)
+        return jdbcTemplate.query(sql, filmMapper, id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + id));
@@ -117,6 +96,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAll() {
         final String sql = "SELECT * FROM films ORDER BY film_id ASC";
-        return jdbcTemplate.query(sql, /*((rs, rowNum) -> mapRow(rs))*/ filmMapper/*new FilmMapper()*/);
+        return jdbcTemplate.query(sql,filmMapper);
     }
 }

@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.message.Message.EMAIL_CANNOT_BE_EMPTY;
 import static ru.yandex.practicum.filmorate.message.Message.LOGIN_MAY_NOT_CONTAIN_SPACES;
@@ -85,11 +82,6 @@ public class UserService extends AbstractService<User> {
     }
 
     public List<User> getListMutualFriends(long id, long otherId) {
-        /*Set<User> usersFriends = new HashSet<>(userStorage.getFriends(id));
-        Set<User> otherFriends = new HashSet<>(userStorage.getFriends(otherId));
-        return usersFriends.stream()
-                .filter(otherFriends::contains)
-                .collect(Collectors.toList());*/
         return  friendStorage.getListMutualFriends(id, otherId);
     }
 }

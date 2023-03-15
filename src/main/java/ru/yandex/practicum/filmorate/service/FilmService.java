@@ -5,15 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.impl.LikeDbStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.Constants.COMPARATOR;
 import static ru.yandex.practicum.filmorate.Constants.DATE;
 import static ru.yandex.practicum.filmorate.message.Message.*;
 

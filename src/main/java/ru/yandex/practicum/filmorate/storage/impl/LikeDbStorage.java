@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -31,11 +30,7 @@ public class LikeDbStorage {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        if (count != null || count > 0) {
-            String sql = "SELECT * FROM films ORDER BY count_likes DESC, film_id ASC LIMIT ?";
-            return jdbcTemplate.query(sql, /*new FilmMapper()*/filmMapper, count);
-        }
-        String sql = "SELECT * FROM films ORDER BY count_likes DESC, film_id ASC";
-        return jdbcTemplate.query(sql, /*new FilmMapper()*/filmMapper);
+        String sql = "SELECT * FROM films ORDER BY count_likes DESC, film_id ASC LIMIT ?";
+        return jdbcTemplate.query(sql, filmMapper, count);
     }
 }
