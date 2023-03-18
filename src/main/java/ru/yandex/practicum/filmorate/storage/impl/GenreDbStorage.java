@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 
@@ -19,6 +17,7 @@ import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final GenreMapper genreMapper;
 
     @Override
     public List<Genre> getGenres() {
@@ -37,9 +36,20 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Set<Genre> getGenreByIdFilm(long id) {
-        String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
-                "ORDER BY genre_id ASC";
-        return new HashSet<>(jdbcTemplate.query(sql, new GenreMapper(), id)) ;
+    public Map<Long, List<Genre>> getGenreByFilm() {
+        String sql = "SELECT fg.film_id, g.* FROM genre AS g, film_genre fg WHERE g.genre_id = fg.genre_id";
+        Map<Long, List<Genre>> listGenresByFilm = jdbcTemplate.query(sql
+                , rs -> {
+                    Map<Long, List<Genre>> list = new HashMap<>();
+
+                    while (rs.next()) {
+                        long idFilm = rs.getLong("film_id");
+                        List<Genre> listGenre = list.getOrDefault(idFilm, new ArrayList<>());
+                        listGenre.add(genreMapper.mapRow(rs, rs.getRow()));
+                        list.put(idFilm, listGenre);
+                    }
+                    return list;
+                });
+        return listGenresByFilm;
     }
 }

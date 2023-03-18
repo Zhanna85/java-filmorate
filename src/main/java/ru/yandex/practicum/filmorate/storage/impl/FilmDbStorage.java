@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
@@ -27,6 +28,7 @@ import static ru.yandex.practicum.filmorate.message.Message.MODEL_NOT_FOUND;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
+    private final GenreDbStorage genreDbStorage;
 
     private void updateGenreByFilm(Film data) {
         final long filmId = data.getId();
@@ -76,7 +78,7 @@ public class FilmDbStorage implements FilmStorage {
                 "rating_id = ? WHERE film_id = ?";
         final int count = jdbcTemplate.update(sql, data.getName(), data.getDescription(), data.getReleaseDate(),
                 data.getDuration(), data.getMpa().getId(), data.getId());
-        updateGenreByFilm(data);
+
         if (count == 0) {
             log.error(MODEL_NOT_FOUND.getMessage() + data.getId());
             throw new NotFoundException(MODEL_NOT_FOUND.getMessage() + data.getId());
@@ -94,11 +96,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film find(long id) {
+        Map<Long, List<Genre>> listGenresByFilms = genreDbStorage.getGenreByFilm();
         final String sql = "SELECT f.*, mpa.name_rating\n" +
                 "FROM films AS f, ratings AS mpa\n" +
                 "WHERE f.rating_id = mpa.rating_id\n" +
                 "AND f.film_id = ?";
-        return jdbcTemplate.query(sql, filmMapper, id)
+        return jdbcTemplate.query(sql, ((rs, rowNum) -> filmMapper.mapRow(rs, listGenresByFilms)), id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(MODEL_NOT_FOUND.getMessage() + id));
@@ -106,10 +109,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
+        Map<Long, List<Genre>> listGenresByFilms = genreDbStorage.getGenreByFilm();
         final String sql = "SELECT f.*, mpa.name_rating\n" +
                 "FROM films AS f, ratings AS mpa\n" +
                 "WHERE f.rating_id = mpa.rating_id\n" +
                 "ORDER BY f.film_id ASC";
-        return jdbcTemplate.query(sql,filmMapper);
+        return jdbcTemplate.query(sql,((rs, rowNum) -> filmMapper.mapRow(rs, listGenresByFilms)));
     }
 }

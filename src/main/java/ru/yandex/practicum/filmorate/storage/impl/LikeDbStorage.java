@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
@@ -15,6 +17,7 @@ public class LikeDbStorage implements LikeStorage {
 
     private JdbcTemplate jdbcTemplate;
     private FilmMapper filmMapper;
+    private final GenreDbStorage genreDbStorage;
 
     @Override
     public void putLike(long id, long userId) {
@@ -34,11 +37,12 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
+        Map<Long, List<Genre>> listGenresByFilms = genreDbStorage.getGenreByFilm();
         String sql = "SELECT f.*, mpa.name_rating\n" +
                 "FROM films AS f, ratings AS mpa\n" +
                 "WHERE f.rating_id = mpa.rating_id\n" +
                 "ORDER BY f.count_likes DESC, film_id ASC\n" +
                 "LIMIT ?";
-        return jdbcTemplate.query(sql, filmMapper, count);
+        return jdbcTemplate.query(sql, ((rs, rowNum) -> filmMapper.mapRow(rs, listGenresByFilms)), count);
     }
 }
