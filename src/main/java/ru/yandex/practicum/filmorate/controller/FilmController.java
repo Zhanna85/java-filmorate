@@ -24,15 +24,13 @@ public class FilmController {
     @PostMapping
     public Film saveFilm(@Valid @RequestBody Film film) {
         log.info(ADD_MODEL.getMessage(), film);
-        filmService.addModel(film);
-        return film;
+        return filmService.addModel(film);
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         log.info(UPDATED_MODEL.getMessage(), film);
-        filmService.updateModel(film);
-        return film;
+        return filmService.updateModel(film);
     }
 
     @PutMapping("/{id}/like/{userId}")

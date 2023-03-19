@@ -5,7 +5,6 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -23,19 +22,11 @@ public class Film extends AbstractModel {
     @NotNull
     private LocalDate releaseDate; // дата релиза
     @Positive
-    private long duration; // продолжительность фильма
+    private int duration; // продолжительность фильма
+    @NotNull
+    private Mpa mpa; // id рейтинга
+    //private List<Genre> genres; // жанры
+    private Set<Genre> genres; // жанры
     @JsonIgnore
-    private Set<Long> likes = new HashSet<>(); // лайки
-
-    public void addLike(Long id) {
-        likes.add(id);
-    }
-
-    public boolean removeLike(Long id) {
-        return likes.remove(id);
-    }
-
-    public int getSizeListLikes() {
-        return likes.size();
-    }
+    private int rate;
 }
